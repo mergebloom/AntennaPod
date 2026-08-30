@@ -1075,6 +1075,8 @@
     <string name="content_crunch_login_failed">Content Crunch login failed</string>
     <string name="content_crunch_smart_skip">Smart skip</string>
     <string name="content_crunch_smart_skip_summary">Automatically skip selected categories during local playback</string>
+    <string name="content_crunch_auto_process_downloads">Process downloaded episodes</string>
+    <string name="content_crunch_auto_process_downloads_summary">Automatically submit completed episode downloads for Content Crunch processing. Disabled by default to avoid unexpected server processing load.</string>
     <string name="content_crunch_skip_categories">Categories to skip</string>
     <string name="content_crunch_category_sponsor">Sponsors</string>
     <string name="content_crunch_category_self_promotion">Self-promotion</string>

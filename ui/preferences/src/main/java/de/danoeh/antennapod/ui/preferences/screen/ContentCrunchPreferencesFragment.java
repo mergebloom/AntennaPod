@@ -45,6 +45,11 @@ public class ContentCrunchPreferencesFragment extends AnimatedPreferenceFragment
         smartSkip.setOnPreferenceChangeListener((preference, value) -> {
             preferences.setSmartSkipEnabled((Boolean) value); return true;
         });
+        SwitchPreferenceCompat autoProcessDownloads = findPreference("contentCrunchAutoProcessDownloads");
+        autoProcessDownloads.setChecked(preferences.isAutoProcessDownloadsEnabled());
+        autoProcessDownloads.setOnPreferenceChangeListener((preference, value) -> {
+            preferences.setAutoProcessDownloadsEnabled((Boolean) value); return true;
+        });
         bindCategory("contentCrunchCategorySponsor", "sponsor");
         bindCategory("contentCrunchCategorySelfPromotion", "self_promotion");
         bindCategory("contentCrunchCategoryIntro", "intro");

@@ -6,6 +6,9 @@
     <Preference android:key="contentCrunchLogout" android:title="@string/content_crunch_logout" />
     <SwitchPreferenceCompat android:key="contentCrunchSmartSkip" android:title="@string/content_crunch_smart_skip"
         android:summary="@string/content_crunch_smart_skip_summary" android:persistent="false" />
+    <SwitchPreferenceCompat android:key="contentCrunchAutoProcessDownloads"
+        android:title="@string/content_crunch_auto_process_downloads"
+        android:summary="@string/content_crunch_auto_process_downloads_summary" android:persistent="false" />
     <PreferenceCategory android:title="@string/content_crunch_skip_categories">
         <SwitchPreferenceCompat android:key="contentCrunchCategorySponsor" android:title="@string/content_crunch_category_sponsor" android:persistent="false" />
         <SwitchPreferenceCompat android:key="contentCrunchCategorySelfPromotion" android:title="@string/content_crunch_category_self_promotion" android:persistent="false" />

@@ -115,6 +115,9 @@ public class MediaDownloadedHandler implements Runnable {
                         .currentTimestamp()
                         .build());
         }
+        if (item != null) {
+            ContentCrunchDownloadScheduler.enqueue(context, item);
+        }
     }
 
     @NonNull

@@ -52,6 +52,10 @@ public final class ContentCrunchPreferences {
     }
     public boolean isSmartSkipEnabled() { return preferences.getBoolean("smart_skip", false); }
     public void setSmartSkipEnabled(boolean value) { preferences.edit().putBoolean("smart_skip", value).apply(); }
+    public boolean isAutoProcessDownloadsEnabled() { return preferences.getBoolean("auto_process_downloads", false); }
+    public void setAutoProcessDownloadsEnabled(boolean value) {
+        preferences.edit().putBoolean("auto_process_downloads", value).apply();
+    }
     public boolean isCategoryEnabled(String category) { return preferences.getBoolean("category_" + category, true); }
     public void setCategoryEnabled(String category, boolean value) {
         preferences.edit().putBoolean("category_" + category, value).apply();
