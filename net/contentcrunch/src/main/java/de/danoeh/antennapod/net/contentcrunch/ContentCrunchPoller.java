@@ -34,11 +34,11 @@ public final class ContentCrunchPoller {
     }
 
     public static boolean isCompleted(ContentCrunchModels.EpisodeResult result) {
-        return result != null && "COMPLETED".equals(result.status);
+        return result != null && "COMPLETED".equalsIgnoreCase(result.status);
     }
 
     public static boolean isFailed(ContentCrunchModels.EpisodeResult result) {
-        return result != null && "FAILED".equals(result.status);
+        return result != null && "FAILED".equalsIgnoreCase(result.status);
     }
 
     public static boolean isTerminal(ContentCrunchModels.EpisodeResult result) {
