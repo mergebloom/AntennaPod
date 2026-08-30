@@ -26,7 +26,10 @@ public final class ContentCrunchClient {
     public static ContentCrunchClient get(Context context) {
         if (instance == null) {
             synchronized (ContentCrunchClient.class) {
-                if (instance == null) { instance = new ContentCrunchClient(new ContentCrunchPreferences(context)); }
+                if (instance == null) {
+                    Context appContext = context.getApplicationContext();
+                    instance = new ContentCrunchClient(new ContentCrunchPreferences(appContext));
+                }
             }
         }
         return instance;

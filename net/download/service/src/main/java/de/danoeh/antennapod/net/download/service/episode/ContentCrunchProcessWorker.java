@@ -9,6 +9,7 @@ import de.danoeh.antennapod.net.contentcrunch.ContentCrunchAutoProcessor;
 import de.danoeh.antennapod.net.contentcrunch.ContentCrunchCache;
 import de.danoeh.antennapod.net.contentcrunch.ContentCrunchClient;
 import de.danoeh.antennapod.net.contentcrunch.ContentCrunchModels;
+import java.io.IOException;
 
 public class ContentCrunchProcessWorker extends Worker {
     public static final String KEY_FEED_URL = "feed_url";
@@ -35,8 +36,12 @@ public class ContentCrunchProcessWorker extends Worker {
             }
             ContentCrunchModels.EpisodeResult submitted = client.process(key);
             ContentCrunchCache.put(key, submitted);
-        } catch (Exception e) {
-            Log.w(TAG, "Automatic processing was skipped", e);
+        } catch (IOException e) {
+            Log.w(TAG, "Automatic processing attempt failed", e);
+            return getRunAttemptCount() < 4 ? Result.retry() : Result.failure();
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Automatic processing is permanently ineligible", e);
+            return Result.failure();
         }
         return Result.success();
     }

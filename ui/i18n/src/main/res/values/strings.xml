@@ -639,7 +639,7 @@
     <string name="special_thanks">Special thanks</string>
     <string name="privacy_policy">Privacy policy</string>
     <string name="licenses">Licenses</string>
-    <string name="licenses_summary">Open-source licenses and AntennaPod attribution</string>
+    <string name="licenses_summary">Open-source licenses and CrunchCast attribution</string>
 
     <!-- Search -->
     <string name="search_status_no_results">No results were found</string>

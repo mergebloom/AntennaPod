@@ -367,7 +367,7 @@
     <string name="pref_auto_delete_title">الحذف التلقائي</string>
     <string name="pref_auto_delete_sum">احذف الحلقات بعد تشغيلها أو عند احتياج التنزيل التلقائي لمساحة</string>
     <string name="pref_auto_local_delete_title">احذف من المجلدات المحلية تلقائيًا</string>
-    <string name="pref_auto_local_delete_sum">أيضًا احذف الملفات المضافة عبر «أضف مجلد محلي». لاحظ أن تلك الملفات لم يتم تنزيلها من AntennaPod ولا يمكن إعادة تنزيلها</string>
+    <string name="pref_auto_local_delete_sum">أيضًا احذف الملفات المضافة عبر «أضف مجلد محلي». لاحظ أن تلك الملفات لم يتم تنزيلها من CrunchCast ولا يمكن إعادة تنزيلها</string>
     <string name="pref_auto_local_delete_dialog_body">فيما يخص المجلدات المحلية، يرجى ملاحظة أن الحلقات ستزال من أنْتِنَابُد وستحذف ملفاتها من ذاكرة تخزين جهازك، ولن تتمكن من تنزيلها عن طريق أنْتِنَابُد مرة أخرى. هل تود بأن تفعل الحذف التلقائي؟</string>
     <string name="pref_smart_mark_as_played_sum">علم على الحلقات على أنها إنتهت حتى لو بقي أقل من مقدار ثوانٍ معين من وقت التشغيل</string>
     <string name="pref_smart_mark_as_played_title">علم بذكاء أنها انتهت</string>
@@ -873,7 +873,7 @@
     <string name="echo_thanks_we_are_glad_old">شكرًا لالتزامك معنا هذا العام!\n\nلقد قمت بتشغيل أول حلقة معنا في %1$s. كان من دواعي شرفنا خدمتك منذ ذلك الحين.</string>
     <string name="echo_hoarder_comment_hoarder">يقولون إن الأرقام لا تكذب. ومع وجود%1$d%% فقط من اشتراكاتك النشطة %2$d التي تم تشغيلها هذا العام، ربما نكون على حق.</string>
     <string name="echo_thanks_we_are_glad_new">لانضمامك إلينا هذا العام!\n\nسواء كنت قد انتقلت إلينا من تطبيق آخر، أو بدأت مغامرة البودكاست معنا: نحن سعداء بانضمامك إلينا!</string>
-    <string name="echo_share">سنتي ال %d في البودكاست #AntennaPodEcho</string>
+    <string name="echo_share">سنتي ال %d في البودكاست #CrunchCastEcho</string>
     <string name="echo_hoarder_subtitle_medium">تحقق من ذلك. لا اكتناز هنا.</string>
     <string name="echo_hoarder_comment_medium">لقد قمت بتشغيل حلقات %1$d%% من اشتراكاتك النشطة البالغ عددها %2$d هذا العام. ماذا عن إعادة زيارة \"%3$s\"؟</string>
     <string name="echo_hoarder_subtitle_clean">نظيف!</string>
@@ -1019,8 +1019,8 @@
     <string name="queue_time_left_label">%1$s • %2$s متبقي</string>
     <string name="no_fav_episodes_head_label">لا توجد مفضلات</string>
     <string name="no_fav_episodes_label">علّم الحلقات كمفضلة عبر النقر على أيقونة النجمة.</string>
-    <string name="bottom_navigation_deprecation_warning">للأسف نحن مضطرون إلى حذف التنقل الجانبي في تحديث مستقبلي. يتم تطوير AntennaPod من قبل فريق صغير من المتطوعين، وبعد الحفاظ على كلا أسلوبي التنقل لسنوات، اصبح الحفاظ على كلاهما حملًا زائدًا.\n\nإذا كنت تعتمد على التنقل الجانبي بشكل كبير، عطّل التحديثات التلقائية لـAntennaPod في متجر التطبيقات خاصتك.</string>
-    <string name="report_bug_message">نعتذر لعدم عمل وظيفة على نحوها المطلوب. نود مساعدتك لتحسين AntennaPod. بالرجاء زيارة منتدياتنا أو صفحتنا على GitHub للتحقق ما إذا تم الإبلاغ عن مشكلتك بالفعل. إذا لم يكن كذلك، اطلعنا وسنتحقق.</string>
+    <string name="bottom_navigation_deprecation_warning">للأسف نحن مضطرون إلى حذف التنقل الجانبي في تحديث مستقبلي. يتم تطوير CrunchCast من قبل فريق صغير من المتطوعين، وبعد الحفاظ على كلا أسلوبي التنقل لسنوات، اصبح الحفاظ على كلاهما حملًا زائدًا.\n\nإذا كنت تعتمد على التنقل الجانبي بشكل كبير، عطّل التحديثات التلقائية لـCrunchCast في متجر التطبيقات خاصتك.</string>
+    <string name="report_bug_message">نعتذر لعدم عمل وظيفة على نحوها المطلوب. نود مساعدتك لتحسين CrunchCast. بالرجاء زيارة منتدياتنا أو صفحتنا على GitHub للتحقق ما إذا تم الإبلاغ عن مشكلتك بالفعل. إذا لم يكن كذلك، اطلعنا وسنتحقق.</string>
     <string name="report_bug_device_info_title">الجهاز</string>
     <string name="report_bug_attrib_app_version">إصدار التطبيق</string>
     <string name="report_bug_attrib_android_version">إصدار Android</string>
@@ -1086,9 +1086,9 @@
     <string name="cover_as_background">الغلاف كخلفية</string>
     <string name="wearos_connected_to" tools:ignore="UnusedResources">متصل بـ%s</string>
     <string name="wearos_version" tools:ignore="UnusedResources">إصدار %s</string>
-    <string name="wearos_phone_not_supported" tools:ignore="UnusedResources">الهاتف غير مُتوافَق. تأكد من استخدام احدث إصدار لـAntennaPod من Google Play على هاتفك.</string>
+    <string name="wearos_phone_not_supported" tools:ignore="UnusedResources">الهاتف غير مُتوافَق. تأكد من استخدام احدث إصدار لـCrunchCast من Google Play على هاتفك.</string>
     <string name="wearos_no_items" tools:ignore="UnusedResources">لا توجد عناصر</string>
-    <string name="wearos_phone_not_reachable" tools:ignore="UnusedResources">تعذّر الوصول للهاتف. تأكد من أنه هاتفك قريب وأن AntennaPod مثبّت.</string>
+    <string name="wearos_phone_not_reachable" tools:ignore="UnusedResources">تعذّر الوصول للهاتف. تأكد من أنه هاتفك قريب وأن CrunchCast مثبّت.</string>
     <string name="wearos_play_on_phone" tools:ignore="UnusedResources">تشغيل على الهاتف</string>
     <string name="wearos_browse_phone" tools:ignore="UnusedResources">تصفح الهاتف</string>
     <string name="wearos_open_on_phone" tools:ignore="UnusedResources">فتح على الهاتف</string>

@@ -104,6 +104,7 @@ public class Media3PlaybackService extends MediaLibraryService {
     private Disposable contentCrunchDisposable;
     private long lastPositionSaveTime = 0;
     private final SkipGuard contentCrunchSkipGuard = new SkipGuard();
+    private ContentCrunchPreferences contentCrunchPreferences;
     private SleepTimer sleepTimer;
     @Nullable
     private LoudnessEnhancer loudnessEnhancer = null;
@@ -113,6 +114,7 @@ public class Media3PlaybackService extends MediaLibraryService {
     @Override
     public void onCreate() {
         super.onCreate();
+        contentCrunchPreferences = new ContentCrunchPreferences(getApplicationContext());
         EventBus.getDefault().register(this);
         DefaultMediaNotificationProvider notificationProvider = new DefaultMediaNotificationProvider(this,
                 session -> R.id.notification_playing,
@@ -547,8 +549,7 @@ public class Media3PlaybackService extends MediaLibraryService {
     }
 
     private void loadContentCrunchSegments(FeedMedia media) {
-        ContentCrunchPreferences preferences = new ContentCrunchPreferences(this);
-        if (!preferences.isSmartSkipEnabled() || media.getItem() == null || isCasting()) {
+        if (!contentCrunchPreferences.isSmartSkipEnabled() || media.getItem() == null || isCasting()) {
             return;
         }
         ContentCrunchModels.EpisodeKey key = EpisodeMatcher.from(media.getItem());
@@ -570,8 +571,7 @@ public class Media3PlaybackService extends MediaLibraryService {
         if (isCasting() || currentPlayable == null || currentPlayable.getItem() == null) {
             return;
         }
-        ContentCrunchPreferences preferences = new ContentCrunchPreferences(this);
-        if (!preferences.isSmartSkipEnabled()) {
+        if (!contentCrunchPreferences.isSmartSkipEnabled()) {
             return;
         }
         ContentCrunchModels.EpisodeResult result = ContentCrunchCache.get(EpisodeMatcher.from(currentPlayable.getItem()));
@@ -581,7 +581,7 @@ public class Media3PlaybackService extends MediaLibraryService {
         long now = System.currentTimeMillis();
         contentCrunchSkipGuard.updatePosition(position);
         ContentCrunchModels.SkipSegment segment = SkipDecision.find(position, -1,
-                result.skipSegments, preferences.enabledCategories());
+                result.skipSegments, contentCrunchPreferences.enabledCategories());
         if (segment != null && !contentCrunchSkipGuard.suppresses(segment.endTime, now)) {
             contentCrunchSkipGuard.record(segment.endTime, now);
             player.seekTo(segment.endTime);
