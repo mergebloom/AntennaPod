@@ -4,6 +4,8 @@
         android:summary="@string/content_crunch_server_url_summary" android:persistent="false" />
     <Preference android:key="contentCrunchLogin" android:title="@string/content_crunch_login" />
     <Preference android:key="contentCrunchLogout" android:title="@string/content_crunch_logout" />
+    <Preference android:key="contentCrunchQueue" android:title="@string/content_crunch_queue_title"
+        android:summary="@string/content_crunch_queue_settings_summary" />
     <SwitchPreferenceCompat android:key="contentCrunchSmartSkip" android:title="@string/content_crunch_smart_skip"
         android:summary="@string/content_crunch_smart_skip_summary" android:persistent="false" />
     <SwitchPreferenceCompat android:key="contentCrunchAutoProcessDownloads"

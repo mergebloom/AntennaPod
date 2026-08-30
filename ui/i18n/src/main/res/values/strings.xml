@@ -1091,4 +1091,18 @@
     <string name="content_crunch_invalid_episode">This episode does not have enough information for Content Crunch</string>
     <string name="content_crunch_unavailable">Content Crunch is unavailable</string>
     <string name="content_crunch_skipped">Skipped %1$s</string>
+    <string name="content_crunch_queue_title">Crunch Queue</string>
+    <string name="content_crunch_queue_settings_summary">Review new and unplayed episodes by summary</string>
+    <string name="content_crunch_queue_empty">No new or unplayed episodes are waiting.</string>
+    <string name="content_crunch_show_dismissed">Show dismissed</string>
+    <string name="content_crunch_reset_dismissed">Reset dismissed episodes</string>
+    <string name="content_crunch_dismissed_reset">Dismissed episodes restored</string>
+    <string name="content_crunch_ready">Summary ready</string>
+    <string name="content_crunch_not_processed">Summary not processed</string>
+    <string name="content_crunch_no_summary">Process this episode to create a summary.</string>
+    <string name="content_crunch_process">Process</string>
+    <string name="content_crunch_retry">Retry</string>
+    <string name="content_crunch_add_queue">Add to queue</string>
+    <string name="content_crunch_archive">Archive</string>
+    <string name="content_crunch_dismiss">Dismiss</string>
 </resources>

@@ -1,5 +1,6 @@
 package de.danoeh.antennapod.ui.preferences.screen;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.InputType;
 import android.widget.EditText;
@@ -38,6 +39,13 @@ public class ContentCrunchPreferencesFragment extends AnimatedPreferenceFragment
         findPreference("contentCrunchLogout").setOnPreferenceClickListener(value -> {
             preferences.logout();
             Toast.makeText(requireContext(), R.string.content_crunch_logged_out, Toast.LENGTH_SHORT).show();
+            return true;
+        });
+        findPreference("contentCrunchQueue").setOnPreferenceClickListener(value -> {
+            Intent intent = new Intent();
+            intent.setClassName(requireContext(),
+                    "de.danoeh.antennapod.ui.screen.contentcrunch.CrunchQueueActivity");
+            startActivity(intent);
             return true;
         });
         SwitchPreferenceCompat smartSkip = findPreference("contentCrunchSmartSkip");
