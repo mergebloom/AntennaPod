@@ -3,6 +3,13 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ktlint)
 }
+
+def releaseSigningProperties = ["releaseStoreFile", "releaseStorePassword", "releaseKeyAlias", "releaseKeyPassword"]
+def configuredReleaseSigningProperties = releaseSigningProperties.findAll { project.hasProperty(it) }
+if (!configuredReleaseSigningProperties.isEmpty() && configuredReleaseSigningProperties.size() != releaseSigningProperties.size()) {
+    throw new GradleException("Release signing requires all of: ${releaseSigningProperties.join(', ')}")
+}
+def hasReleaseSigning = configuredReleaseSigningProperties.size() == releaseSigningProperties.size()
 apply from: "../common.gradle"
 apply from: "../playFlavor.gradle"
 
@@ -11,21 +18,23 @@ android {
     enableKotlin true
 
     defaultConfig {
-        applicationId "de.danoeh.antennapod"
+        applicationId "ca.mkna.crunchcast"
         minSdk 25
         targetSdk 36
-        versionCode 1
-        versionName "1.0"
+        versionCode 1000095
+        versionName "1.0.0"
     }
 
-    signingConfigs {
-        releaseConfig {
-            enableV1Signing true
-            enableV2Signing true
-            storeFile file(project.getProperties().getOrDefault("releaseStoreFile", "keystore"))
-            storePassword project.getProperties().getOrDefault("releaseStorePassword", "password")
-            keyAlias project.getProperties().getOrDefault("releaseKeyAlias", "alias")
-            keyPassword project.getProperties().getOrDefault("releaseKeyPassword", "password")
+    if (hasReleaseSigning) {
+        signingConfigs {
+            releaseConfig {
+                enableV1Signing true
+                enableV2Signing true
+                storeFile file(project.property("releaseStoreFile"))
+                storePassword project.property("releaseStorePassword")
+                keyAlias project.property("releaseKeyAlias")
+                keyPassword project.property("releaseKeyPassword")
+            }
         }
     }
 
@@ -36,7 +45,9 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
-            signingConfig signingConfigs.releaseConfig
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.releaseConfig
+            }
             proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard.cfg"
         }
     }
@@ -53,6 +64,15 @@ android {
 afterEvaluate {
     tasks.named('lint').configure {
         dependsOn ktlintCheck
+    }
+}
+
+gradle.taskGraph.whenReady { graph ->
+    def releasePackagingRequested = graph.allTasks.any {
+        it.project == project && it.name.toLowerCase().matches(".*(assemble|bundle|package).*release.*")
+    }
+    if (releasePackagingRequested && !hasReleaseSigning) {
+        throw new GradleException("Release signing properties are required: ${releaseSigningProperties.join(', ')}")
     }
 }
 

@@ -2,6 +2,13 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.triplet.play) apply false
 }
+
+def releaseSigningProperties = ["releaseStoreFile", "releaseStorePassword", "releaseKeyAlias", "releaseKeyPassword"]
+def configuredReleaseSigningProperties = releaseSigningProperties.findAll { project.hasProperty(it) }
+if (!configuredReleaseSigningProperties.isEmpty() && configuredReleaseSigningProperties.size() != releaseSigningProperties.size()) {
+    throw new GradleException("Release signing requires all of: ${releaseSigningProperties.join(', ')}")
+}
+def hasReleaseSigning = configuredReleaseSigningProperties.size() == releaseSigningProperties.size()
 apply from: "../common.gradle"
 apply from: "../playFlavor.gradle"
 
@@ -9,34 +16,39 @@ android {
     namespace "de.danoeh.antennapod"
 
     defaultConfig {
+        applicationId "ca.mkna.crunchcast"
         // Version code schema:
         // "1.2.3-beta4"    -> 1020304
         // "1.2.3"          -> 1020395
-        versionCode 3120095
-        versionName "3.12.0"
+        versionCode 1000095
+        versionName "1.0.0"
     }
 
-    signingConfigs {
-        releaseConfig {
-            enableV1Signing true
-            enableV2Signing true
-            storeFile file(project.getProperties().getOrDefault("releaseStoreFile", "keystore"))
-            storePassword project.getProperties().getOrDefault("releaseStorePassword", "password")
-            keyAlias project.getProperties().getOrDefault("releaseKeyAlias", "alias")
-            keyPassword project.getProperties().getOrDefault("releaseKeyPassword", "password")
+    if (hasReleaseSigning) {
+        signingConfigs {
+            releaseConfig {
+                enableV1Signing true
+                enableV2Signing true
+                storeFile file(project.property("releaseStoreFile"))
+                storePassword project.property("releaseStorePassword")
+                keyAlias project.property("releaseKeyAlias")
+                keyPassword project.property("releaseKeyPassword")
+            }
         }
     }
 
     buildTypes {
         debug {
             applicationIdSuffix ".debug"
-            resValue "string", "provider_authority", "de.danoeh.antennapod.debug.provider"
+            resValue "string", "provider_authority", "ca.mkna.crunchcast.debug.provider"
         }
         release {
-            resValue "string", "provider_authority", "de.danoeh.antennapod.provider"
+            resValue "string", "provider_authority", "ca.mkna.crunchcast.provider"
             minifyEnabled true
             shrinkResources true
-            signingConfig signingConfigs.releaseConfig
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.releaseConfig
+            }
         }
     }
 
@@ -146,5 +158,15 @@ if (project.hasProperty("antennaPodPlayPublisherCredentials")) {
         releaseStatus.set(com.github.triplet.gradle.androidpublisher.ReleaseStatus.IN_PROGRESS)
         userFraction.set(0.01d)
         serviceAccountCredentials.set(file(antennaPodPlayPublisherCredentials))
+    }
+}
+
+
+gradle.taskGraph.whenReady { graph ->
+    def releasePackagingRequested = graph.allTasks.any {
+        it.project == project && it.name.toLowerCase().matches(".*(assemble|bundle|package).*release.*")
+    }
+    if (releasePackagingRequested && !hasReleaseSigning) {
+        throw new GradleException("Release signing properties are required: ${releaseSigningProperties.join(', ')}")
     }
 }

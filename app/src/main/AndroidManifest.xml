@@ -107,8 +107,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="antennapod.org"
-                    android:pathPrefix="/deeplink/main"
+                    android:host="contentcrunch.ca"
+                    android:pathPrefix="/crunchcast/deeplink/main"
                     android:scheme="https" />
             </intent-filter>
             <intent-filter android:autoVerify="true">
@@ -118,8 +118,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
 
                 <data
-                    android:host="antennapod.org"
-                    android:pathPrefix="/deeplink/search"
+                    android:host="contentcrunch.ca"
+                    android:pathPrefix="/crunchcast/deeplink/search"
                     android:scheme="https" />
             </intent-filter>
             <intent-filter>
@@ -229,7 +229,7 @@
                 <data android:scheme="itpc"/>
                 <data android:scheme="pcast"/>
                 <data android:scheme="feed"/>
-                <data android:scheme="antennapod-subscribe"/>
+                <data android:scheme="crunchcast-subscribe"/>
             </intent-filter>
 
             <intent-filter android:autoVerify="true">
@@ -238,8 +238,8 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
-                <data android:host="antennapod.org" />
-                <data android:pathPrefix="/deeplink/subscribe" />
+                <data android:host="contentcrunch.ca" />
+                <data android:pathPrefix="/crunchcast/deeplink/subscribe" />
                 <data android:scheme="http" />
                 <data android:scheme="https" />
             </intent-filter>

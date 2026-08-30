@@ -11,22 +11,22 @@
     <color name="feed_text_bg">#55333333</color>
 
     <!-- Theme colors -->
-    <color name="background_light">#f9fcff</color>
-    <color name="background_elevated_light">#EFEEEE</color>
-    <color name="background_darktheme">#21272b</color>
-    <color name="background_elevated_darktheme">#2D3337</color>
+    <color name="background_light">#FFF8EF</color>
+    <color name="background_elevated_light">#F7EBDD</color>
+    <color name="background_darktheme">#21151F</color>
+    <color name="background_elevated_darktheme">#30202D</color>
     <color name="non_square_icon_background">#22777777</color>
     <color name="seek_background_light">#90000000</color>
     <color name="seek_background_dark">#905B5B5B</color>
     <color name="text_color_secondary_light">#444444</color>
     <color name="text_color_secondary_dark">#cccccc</color>
-    <color name="color_surface_variant_light">#D3DCE0</color>
-    <color name="color_surface_variant_dark">#2F3B4F</color>
-    <color name="color_secondary_container_light">#C8D8DE</color>
-    <color name="color_secondary_container_dark">#3C4E68</color>
+    <color name="color_surface_variant_light">#EEDCCB</color>
+    <color name="color_surface_variant_dark">#4A3546</color>
+    <color name="color_secondary_container_light">#FFD8BA</color>
+    <color name="color_secondary_container_dark">#613C2D</color>
 
-    <color name="accent_light">#0078C2</color>
-    <color name="accent_dark">#3D8BFF</color>
+    <color name="accent_light">#9B3100</color>
+    <color name="accent_dark">#FFB17A</color>
 
     <color name="gradient_000">#364ff3</color>
     <color name="gradient_025">#2E6FF6</color>
