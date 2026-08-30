@@ -46,8 +46,7 @@
 
         <activity
             android:name=".ui.screen.contentcrunch.CrunchQueueActivity"
-            android:exported="false"
-            android:theme="@style/Theme.AntennaPod" />
+            android:exported="false" />
 
         <activity
             android:name=".ui.screen.playback.PlaybackSpeedDialogActivity"
