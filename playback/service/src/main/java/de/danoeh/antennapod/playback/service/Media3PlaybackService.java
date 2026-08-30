@@ -35,6 +35,8 @@ import de.danoeh.antennapod.event.playback.BufferUpdateEvent;
 import de.danoeh.antennapod.event.playback.PlaybackPositionEvent;
 import de.danoeh.antennapod.event.playback.PlaybackServiceEvent;
 import de.danoeh.antennapod.event.playback.SleepTimerUpdatedEvent;
+import de.danoeh.antennapod.event.playback.SmartSkipEvent;
+import de.danoeh.antennapod.event.playback.SmartSkipUndoEvent;
 import de.danoeh.antennapod.event.playback.SpeedChangedEvent;
 import de.danoeh.antennapod.model.feed.Chapter;
 import de.danoeh.antennapod.model.feed.FeedItem;
@@ -577,13 +579,33 @@ public class Media3PlaybackService extends MediaLibraryService {
             return;
         }
         long now = System.currentTimeMillis();
+        contentCrunchSkipGuard.updatePosition(position);
         ContentCrunchModels.SkipSegment segment = SkipDecision.find(position, -1,
                 result.skipSegments, preferences.enabledCategories());
         if (segment != null && !contentCrunchSkipGuard.suppresses(segment.endTime, now)) {
             contentCrunchSkipGuard.record(segment.endTime, now);
             player.seekTo(segment.endTime);
-            EventBus.getDefault().post(new MessageEvent(getString(R.string.content_crunch_skipped,
-                    segment.label.isEmpty() ? segment.category : segment.label)));
+            EventBus.getDefault().post(new SmartSkipEvent(currentPlayable.getId(), segment.startTime,
+                    segment.endTime, segment.category, segment.label));
+        }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onSmartSkipUndo(SmartSkipUndoEvent event) {
+        if (isCasting() || player == null || currentPlayable == null || currentPlayable.getItem() == null
+                || currentPlayable.getId() != event.mediaId) {
+            return;
+        }
+        ContentCrunchModels.EpisodeResult result = ContentCrunchCache.get(EpisodeMatcher.from(currentPlayable.getItem()));
+        if (result == null) {
+            return;
+        }
+        for (ContentCrunchModels.SkipSegment segment : result.skipSegments) {
+            if (segment.startTime == event.startPosition && segment.endTime == event.endPosition) {
+                contentCrunchSkipGuard.recordUndo(segment.endTime);
+                player.seekTo(segment.startTime);
+                return;
+            }
         }
     }
 

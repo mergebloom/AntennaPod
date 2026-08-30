@@ -42,6 +42,8 @@ import de.danoeh.antennapod.event.EpisodeDownloadEvent;
 import de.danoeh.antennapod.event.FeedUpdateRunningEvent;
 import de.danoeh.antennapod.event.MessageEvent;
 import de.danoeh.antennapod.event.StreamingConfirmationEvent;
+import de.danoeh.antennapod.event.playback.SmartSkipEvent;
+import de.danoeh.antennapod.event.playback.SmartSkipUndoEvent;
 import de.danoeh.antennapod.model.download.DownloadStatus;
 import de.danoeh.antennapod.net.download.service.feed.FeedUpdateManagerImpl;
 import de.danoeh.antennapod.net.download.serviceinterface.DownloadServiceInterface;
@@ -685,6 +687,13 @@ public class MainActivity extends CastEnabledActivity implements NavigationToolb
         if (event.action != null) {
             snackbar.setAction(event.actionText, v -> event.action.accept(this));
         }
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onSmartSkip(SmartSkipEvent event) {
+        String reason = event.label.isEmpty() ? event.category : event.label;
+        onEventMainThread(new MessageEvent(getString(R.string.content_crunch_skipped, reason),
+                context -> EventBus.getDefault().post(new SmartSkipUndoEvent(event)), getString(R.string.undo)));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
