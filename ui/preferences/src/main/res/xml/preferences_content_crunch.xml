@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <EditTextPreference android:key="contentCrunchBaseUrl" android:title="@string/content_crunch_server_url"
+        android:summary="@string/content_crunch_server_url_summary" android:persistent="false" />
+    <Preference android:key="contentCrunchLogin" android:title="@string/content_crunch_login" />
+    <Preference android:key="contentCrunchLogout" android:title="@string/content_crunch_logout" />
+    <SwitchPreferenceCompat android:key="contentCrunchSmartSkip" android:title="@string/content_crunch_smart_skip"
+        android:summary="@string/content_crunch_smart_skip_summary" android:persistent="false" />
+    <PreferenceCategory android:title="@string/content_crunch_skip_categories">
+        <SwitchPreferenceCompat android:key="contentCrunchCategorySponsor" android:title="@string/content_crunch_category_sponsor" android:persistent="false" />
+        <SwitchPreferenceCompat android:key="contentCrunchCategorySelfPromotion" android:title="@string/content_crunch_category_self_promotion" android:persistent="false" />
+        <SwitchPreferenceCompat android:key="contentCrunchCategoryIntro" android:title="@string/content_crunch_category_intro" android:persistent="false" />
+        <SwitchPreferenceCompat android:key="contentCrunchCategoryOutro" android:title="@string/content_crunch_category_outro" android:persistent="false" />
+        <SwitchPreferenceCompat android:key="contentCrunchCategoryInteraction" android:title="@string/content_crunch_category_interaction" android:persistent="false" />
+        <SwitchPreferenceCompat android:key="contentCrunchCategoryPreviewRecap" android:title="@string/content_crunch_category_preview_recap" android:persistent="false" />
+        <SwitchPreferenceCompat android:key="contentCrunchCategoryFiller" android:title="@string/content_crunch_category_filler" android:persistent="false" />
+    </PreferenceCategory>
+</PreferenceScreen>

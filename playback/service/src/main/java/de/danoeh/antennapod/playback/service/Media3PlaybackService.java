@@ -42,6 +42,13 @@ import de.danoeh.antennapod.model.feed.FeedMedia;
 import de.danoeh.antennapod.model.feed.FeedPreferences;
 import de.danoeh.antennapod.model.feed.VolumeAdaptionSetting;
 import de.danoeh.antennapod.net.common.NetworkUtils;
+import de.danoeh.antennapod.net.contentcrunch.ContentCrunchCache;
+import de.danoeh.antennapod.net.contentcrunch.ContentCrunchClient;
+import de.danoeh.antennapod.net.contentcrunch.ContentCrunchModels;
+import de.danoeh.antennapod.net.contentcrunch.ContentCrunchPreferences;
+import de.danoeh.antennapod.net.contentcrunch.EpisodeMatcher;
+import de.danoeh.antennapod.net.contentcrunch.SkipDecision;
+import de.danoeh.antennapod.net.contentcrunch.SkipGuard;
 import de.danoeh.antennapod.net.sync.serviceinterface.SynchronizationQueue;
 import de.danoeh.antennapod.playback.base.MediaItemAdapter;
 import de.danoeh.antennapod.playback.base.PlayerStatus;
@@ -92,7 +99,9 @@ public class Media3PlaybackService extends MediaLibraryService {
     private Disposable mediaLoaderDisposable;
     private Disposable positionObserverDisposable;
     private Disposable queueLoaderDisposable;
+    private Disposable contentCrunchDisposable;
     private long lastPositionSaveTime = 0;
+    private final SkipGuard contentCrunchSkipGuard = new SkipGuard();
     private SleepTimer sleepTimer;
     @Nullable
     private LoudnessEnhancer loudnessEnhancer = null;
@@ -390,6 +399,10 @@ public class Media3PlaybackService extends MediaLibraryService {
             queueLoaderDisposable.dispose();
             queueLoaderDisposable = null;
         }
+        if (contentCrunchDisposable != null) {
+            contentCrunchDisposable.dispose();
+            contentCrunchDisposable = null;
+        }
         saveCurrentPosition();
         if (loudnessEnhancer != null) {
             loudnessEnhancer.release();
@@ -437,6 +450,7 @@ public class Media3PlaybackService extends MediaLibraryService {
                                 if (SkipUtils.skipEndingIfNecessary(this, currentPlayable, position, duration, speed)) {
                                     player.seekTo(player.getDuration());
                                 }
+                                skipContentCrunchSegment(position);
                             }
                         }, error -> Log.e(TAG, "Position observer error", error));
     }
@@ -508,6 +522,12 @@ public class Media3PlaybackService extends MediaLibraryService {
     @OptIn(markerClass = UnstableApi.class)
     private void switchToPlayable(FeedMedia media) {
         currentPlayable = media;
+        contentCrunchSkipGuard.clear();
+        if (contentCrunchDisposable != null) {
+            contentCrunchDisposable.dispose();
+            contentCrunchDisposable = null;
+        }
+        loadContentCrunchSegments(media);
         currentPlayable.onPlaybackStart();
 
         float speed = PlaybackSpeedUtils.getCurrentPlaybackSpeed(currentPlayable);
@@ -522,6 +542,49 @@ public class Media3PlaybackService extends MediaLibraryService {
             applyVolumeAdaption(1.0f);
         }
         updatePlaybackPreferences();
+    }
+
+    private void loadContentCrunchSegments(FeedMedia media) {
+        ContentCrunchPreferences preferences = new ContentCrunchPreferences(this);
+        if (!preferences.isSmartSkipEnabled() || media.getItem() == null || isCasting()) {
+            return;
+        }
+        ContentCrunchModels.EpisodeKey key = EpisodeMatcher.from(media.getItem());
+        if (!EpisodeMatcher.isValid(key) || ContentCrunchCache.get(key) != null) {
+            return;
+        }
+        contentCrunchDisposable = Schedulers.io().scheduleDirect(() -> {
+            try {
+                ContentCrunchModels.EpisodeResult result = ContentCrunchClient.get(this).lookupAndPoll(key);
+                if (currentPlayable != null && currentPlayable.getId() == media.getId()) {
+                    ContentCrunchCache.put(key, result);
+                }
+            } catch (Exception ignored) {
+            }
+        });
+    }
+
+    private void skipContentCrunchSegment(long position) {
+        if (isCasting() || currentPlayable == null || currentPlayable.getItem() == null) {
+            return;
+        }
+        ContentCrunchPreferences preferences = new ContentCrunchPreferences(this);
+        if (!preferences.isSmartSkipEnabled()) {
+            return;
+        }
+        ContentCrunchModels.EpisodeResult result = ContentCrunchCache.get(EpisodeMatcher.from(currentPlayable.getItem()));
+        if (result == null) {
+            return;
+        }
+        long now = System.currentTimeMillis();
+        ContentCrunchModels.SkipSegment segment = SkipDecision.find(position, -1,
+                result.skipSegments, preferences.enabledCategories());
+        if (segment != null && !contentCrunchSkipGuard.suppresses(segment.endTime, now)) {
+            contentCrunchSkipGuard.record(segment.endTime, now);
+            player.seekTo(segment.endTime);
+            EventBus.getDefault().post(new MessageEvent(getString(R.string.content_crunch_skipped,
+                    segment.label.isEmpty() ? segment.category : segment.label)));
+        }
     }
 
     private void updatePlaybackPreferences() {

@@ -30,6 +30,7 @@ dependencies {
     implementation project(":event")
     implementation project(":model")
     implementation project(":net:common")
+    implementation project(":net:contentcrunch")
     implementation project(":net:sync:gpoddernet")
     implementation project(":storage:preferences")
     implementation project(":storage:importexport")

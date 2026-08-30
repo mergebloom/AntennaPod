@@ -1061,4 +1061,32 @@
     <string name="wearos_play_on_phone" tools:ignore="UnusedResources">Play on phone</string>
     <string name="wearos_browse_phone" tools:ignore="UnusedResources">Browse phone</string>
     <string name="wearos_open_on_phone" tools:ignore="UnusedResources">Open on phone</string>
+    <string name="content_crunch_title">Content Crunch</string>
+    <string name="content_crunch_summary">Episode summaries and automatic smart skipping</string>
+    <string name="content_crunch_server_url">Server URL</string>
+    <string name="content_crunch_server_url_summary">HTTPS URL of your Content Crunch server</string>
+    <string name="content_crunch_https_required">Content Crunch requires an HTTPS server URL</string>
+    <string name="content_crunch_login">Log in</string>
+    <string name="content_crunch_logout">Log out</string>
+    <string name="content_crunch_logged_out">Logged out of Content Crunch</string>
+    <string name="content_crunch_email">Email</string>
+    <string name="content_crunch_password">Password</string>
+    <string name="content_crunch_login_success">Logged in to Content Crunch</string>
+    <string name="content_crunch_login_failed">Content Crunch login failed</string>
+    <string name="content_crunch_smart_skip">Smart skip</string>
+    <string name="content_crunch_smart_skip_summary">Automatically skip selected categories during local playback</string>
+    <string name="content_crunch_skip_categories">Categories to skip</string>
+    <string name="content_crunch_category_sponsor">Sponsors</string>
+    <string name="content_crunch_category_self_promotion">Self-promotion</string>
+    <string name="content_crunch_category_intro">Intros</string>
+    <string name="content_crunch_category_outro">Outros</string>
+    <string name="content_crunch_category_interaction">Interaction</string>
+    <string name="content_crunch_category_preview_recap">Previews and recaps</string>
+    <string name="content_crunch_category_filler">Filler</string>
+    <string name="content_crunch_request_summary">Content Crunch summary</string>
+    <string name="content_crunch_processing">Content Crunch is processing this episode</string>
+    <string name="content_crunch_failed">Content Crunch could not process this episode</string>
+    <string name="content_crunch_invalid_episode">This episode does not have enough information for Content Crunch</string>
+    <string name="content_crunch_unavailable">Content Crunch is unavailable</string>
+    <string name="content_crunch_skipped">Skipped %1$s</string>
 </resources>

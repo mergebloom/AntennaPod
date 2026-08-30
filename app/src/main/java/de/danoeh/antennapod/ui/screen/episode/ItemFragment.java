@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.fragment.app.Fragment;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.resource.bitmap.FitCenter;
@@ -44,6 +45,11 @@ import de.danoeh.antennapod.event.PlayerStatusEvent;
 import de.danoeh.antennapod.model.feed.Feed;
 import de.danoeh.antennapod.model.feed.FeedItem;
 import de.danoeh.antennapod.model.feed.FeedMedia;
+import de.danoeh.antennapod.net.contentcrunch.ContentCrunchCache;
+import de.danoeh.antennapod.net.contentcrunch.ContentCrunchClient;
+import de.danoeh.antennapod.net.contentcrunch.ContentCrunchModels;
+import de.danoeh.antennapod.net.contentcrunch.ContentCrunchPoller;
+import de.danoeh.antennapod.net.contentcrunch.EpisodeMatcher;
 import de.danoeh.antennapod.net.download.serviceinterface.DownloadServiceInterface;
 import de.danoeh.antennapod.playback.service.PlaybackController;
 import de.danoeh.antennapod.playback.service.PlaybackService;
@@ -101,6 +107,7 @@ public class ItemFragment extends Fragment {
     private ItemActionButton actionButton1;
     private ItemActionButton actionButton2;
     private Disposable disposable;
+    private Disposable contentCrunchDisposable;
     private FeeditemFragmentBinding viewBinding;
 
     @Override
@@ -162,6 +169,7 @@ public class ItemFragment extends Fragment {
             }
             actionButton2.onClick(getContext());
         });
+        viewBinding.contentCrunchButton.setOnClickListener(v -> requestContentCrunchSummary());
         viewBinding.txtvPodcast.setOnLongClickListener(v -> {
             ClipboardUtils.copyText(viewBinding.txtvPodcast);
             return true;
@@ -235,6 +243,10 @@ public class ItemFragment extends Fragment {
         super.onDestroyView();
         if (disposable != null) {
             disposable.dispose();
+        }
+        if (contentCrunchDisposable != null) {
+            contentCrunchDisposable.dispose();
+            contentCrunchDisposable = null;
         }
         viewBinding.contentRoot.removeView(viewBinding.webvDescription);
         viewBinding.webvDescription.destroy();
@@ -354,6 +366,45 @@ public class ItemFragment extends Fragment {
             Fragment fragment = FeedItemlistFragment.newInstance(item.getFeedId());
             ((MainActivity) getActivity()).loadChildFragment(fragment);
         }
+    }
+
+    private void requestContentCrunchSummary() {
+        if (item == null || item.getMedia() == null) {
+            return;
+        }
+        ContentCrunchModels.EpisodeKey key = EpisodeMatcher.from(item);
+        if (!EpisodeMatcher.isValid(key)) {
+            showContentCrunchResult(getString(R.string.content_crunch_invalid_episode));
+            return;
+        }
+        ContentCrunchModels.EpisodeResult cached = ContentCrunchCache.get(key);
+        if (cached != null && !cached.summary.isEmpty()) {
+            showContentCrunchResult(cached.summary);
+            return;
+        }
+        viewBinding.contentCrunchButton.setEnabled(false);
+        contentCrunchDisposable = Maybe.fromCallable(
+                () -> ContentCrunchClient.get(requireContext()).processAndPoll(key))
+                .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
+                .subscribe(result -> {
+                    ContentCrunchCache.put(key, result);
+                    viewBinding.contentCrunchButton.setEnabled(true);
+                    if (ContentCrunchPoller.isFailed(result)) {
+                        showContentCrunchResult(getString(R.string.content_crunch_failed));
+                    } else if (ContentCrunchPoller.isCompleted(result)) {
+                        showContentCrunchResult(result.summary);
+                    } else {
+                        showContentCrunchResult(getString(R.string.content_crunch_processing));
+                    }
+                }, error -> {
+                    viewBinding.contentCrunchButton.setEnabled(true);
+                    showContentCrunchResult(getString(R.string.content_crunch_unavailable));
+                });
+    }
+
+    private void showContentCrunchResult(String message) {
+        new AlertDialog.Builder(requireContext()).setTitle(R.string.content_crunch_title)
+                .setMessage(message).setPositiveButton(android.R.string.ok, null).show();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
