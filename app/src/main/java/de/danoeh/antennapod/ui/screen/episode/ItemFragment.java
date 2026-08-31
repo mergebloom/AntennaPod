@@ -431,6 +431,7 @@ public class ItemFragment extends Fragment {
         final StringBuilder partial = new StringBuilder();
         contentCrunchDisposable = Maybe.fromCallable(() -> ContentCrunchClient.get(requireContext())
                 .processAndObserve(key, config, event -> {
+                    if (!isAdded() || viewBinding == null) { return false; }
                     final JSONObject data;
                     try { data = new JSONObject(event.data); }
                     catch (JSONException error) { throw new IOException(error); }
@@ -438,11 +439,26 @@ public class ItemFragment extends Fragment {
                         String updated = ContentCrunchSseParser.appendDelta(partial.toString(),
                                 data.optInt("offset", partial.length()), data.optString("text"));
                         partial.setLength(0); partial.append(updated);
-                        requireActivity().runOnUiThread(() -> showContentCrunchState(updated, true));
-                    } else if (event.type.equals("stage") || event.type.equals("snapshot")) {
+                        android.app.Activity activity = getActivity();
+                        if (activity != null) {
+                            activity.runOnUiThread(() -> showContentCrunchState(updated, true));
+                        }
+                    } else if (event.type.equals("snapshot")) {
+                        String snapshot = data.optString("partialSummary", "");
+                        if (!snapshot.isEmpty()) {
+                            partial.setLength(0); partial.append(snapshot);
+                            android.app.Activity activity = getActivity();
+                            if (activity != null) {
+                                activity.runOnUiThread(() -> showContentCrunchState(snapshot, true));
+                            }
+                        }
+                    } else if (event.type.equals("stage")) {
                         String message = data.optString("message", data.optString("stage", ""));
                         if (!message.isEmpty()) {
-                            requireActivity().runOnUiThread(() -> showContentCrunchState(message, true));
+                            android.app.Activity activity = getActivity();
+                            if (activity != null) {
+                                activity.runOnUiThread(() -> showContentCrunchState(message, true));
+                            }
                         }
                     }
                     return !event.type.equals("completed") && !event.type.equals("failed");
