@@ -52,6 +52,7 @@ public class EpisodeItemViewHolder extends RecyclerView.ViewHolder {
     public final ImageView isInQueue;
     private final ImageView isVideo;
     public final ImageView isFavorite;
+    public final ImageView hasSummary;
     private final ProgressBar progressBar;
     public final View secondaryActionButton;
     public final ImageView secondaryActionIcon;
@@ -80,6 +81,7 @@ public class EpisodeItemViewHolder extends RecyclerView.ViewHolder {
         isVideo = itemView.findViewById(R.id.ivIsVideo);
         isInbox = itemView.findViewById(R.id.statusInbox);
         isFavorite = itemView.findViewById(R.id.isFavorite);
+        hasSummary = itemView.findViewById(R.id.hasSummary);
         size = itemView.findViewById(R.id.size);
         separatorIcons = itemView.findViewById(R.id.separatorIcons);
         secondaryActionProgress = itemView.findViewById(R.id.secondaryActionProgress);
@@ -104,6 +106,7 @@ public class EpisodeItemViewHolder extends RecyclerView.ViewHolder {
         isInbox.setVisibility(item.isNew() ? View.VISIBLE : View.GONE);
         isFavorite.setVisibility(item.isTagged(FeedItem.TAG_FAVORITE) ? View.VISIBLE : View.GONE);
         isInQueue.setVisibility(item.isTagged(FeedItem.TAG_QUEUE) ? View.VISIBLE : View.GONE);
+        hasSummary.setVisibility(View.GONE);
         container.setAlpha(item.isPlayed() ? 0.5f : 1.0f);
 
         ItemActionButton actionButton = ItemActionButton.forItem(item);
@@ -202,6 +205,7 @@ public class EpisodeItemViewHolder extends RecyclerView.ViewHolder {
         isVideo.setVisibility(View.GONE);
         isFavorite.setVisibility(View.GONE);
         isInQueue.setVisibility(View.GONE);
+        hasSummary.setVisibility(View.GONE);
         title.setText("███████");
         pubDate.setText("████");
         duration.setText("████");
@@ -246,6 +250,10 @@ public class EpisodeItemViewHolder extends RecyclerView.ViewHolder {
         return item;
     }
 
+    public void setSummaryAvailable(boolean available) {
+        hasSummary.setVisibility(available ? View.VISIBLE : View.GONE);
+    }
+
     public boolean isPlayingItem() {
         return item.getMedia() != null && PlaybackStatus.isPlaying(item.getMedia());
     }
@@ -265,7 +273,7 @@ public class EpisodeItemViewHolder extends RecyclerView.ViewHolder {
                 || isInQueue.getVisibility() == View.VISIBLE
                 || isVideo.getVisibility() == View.VISIBLE
                 || isFavorite.getVisibility() == View.VISIBLE
-                || isInbox.getVisibility() == View.VISIBLE;
+                || hasSummary.getVisibility() == View.VISIBLE;
         separatorIcons.setVisibility(hasIcons ? View.VISIBLE : View.GONE);
     }
 }

@@ -129,6 +129,15 @@
                     app:tint="?attr/colorOnSurfaceVariant"
                     app:srcCompat="@drawable/ic_playlist_play" />
 
+                <ImageView
+                    android:id="@+id/hasSummary"
+                    android:layout_width="12sp"
+                    android:layout_height="12sp"
+                    android:contentDescription="@string/content_crunch_summary_available"
+                    android:visibility="gone"
+                    app:tint="?attr/colorOnSurfaceVariant"
+                    app:srcCompat="@drawable/ic_content_crunch_summary" />
+
                 <TextView
                     android:id="@+id/separatorIcons"
                     android:layout_width="wrap_content"

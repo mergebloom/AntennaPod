@@ -54,6 +54,7 @@ import de.danoeh.antennapod.net.contentcrunch.ContentCrunchModels;
 import de.danoeh.antennapod.net.contentcrunch.ContentCrunchPoller;
 import de.danoeh.antennapod.net.contentcrunch.ContentCrunchPreferences;
 import de.danoeh.antennapod.net.contentcrunch.ContentCrunchSseParser;
+import de.danoeh.antennapod.net.contentcrunch.ContentCrunchSummaryFormatter;
 import de.danoeh.antennapod.net.contentcrunch.EpisodeMatcher;
 import de.danoeh.antennapod.net.contentcrunch.SummaryConfig;
 import de.danoeh.antennapod.net.download.serviceinterface.DownloadServiceInterface;
@@ -484,7 +485,7 @@ public class ItemFragment extends Fragment {
         if (viewBinding == null) { return; }
         viewBinding.contentCrunchSummaryBlock.setVisibility(View.VISIBLE);
         viewBinding.contentCrunchProgress.setVisibility(loading ? View.VISIBLE : View.GONE);
-        viewBinding.contentCrunchSummaryText.setText(message);
+        viewBinding.contentCrunchSummaryText.setText(ContentCrunchSummaryFormatter.format(message));
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

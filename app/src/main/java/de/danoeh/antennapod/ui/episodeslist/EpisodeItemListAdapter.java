@@ -19,11 +19,19 @@ import de.danoeh.antennapod.ui.SelectableAdapter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
 
 import de.danoeh.antennapod.R;
 import de.danoeh.antennapod.activity.MainActivity;
 import de.danoeh.antennapod.model.feed.FeedItem;
+import de.danoeh.antennapod.net.contentcrunch.ContentCrunchCache;
+import de.danoeh.antennapod.net.contentcrunch.ContentCrunchClient;
+import de.danoeh.antennapod.net.contentcrunch.ContentCrunchModels;
+import de.danoeh.antennapod.net.contentcrunch.ContentCrunchPreferences;
+import de.danoeh.antennapod.net.contentcrunch.EpisodeMatcher;
 import de.danoeh.antennapod.ui.screen.episode.ItemPagerFragment;
 
 /**
@@ -37,6 +45,8 @@ public class EpisodeItemListAdapter extends SelectableAdapter<EpisodeItemViewHol
     private FeedItem longPressedItem;
     int longPressedPosition = 0; // used to init actionMode
     private int dummyViews = 0;
+    private final Set<String> availableSummaries = new HashSet<>();
+    private final Set<String> checkedSummaries = new HashSet<>();
 
     public EpisodeItemListAdapter(FragmentActivity mainActivity) {
         super(mainActivity);
@@ -53,6 +63,7 @@ public class EpisodeItemListAdapter extends SelectableAdapter<EpisodeItemViewHol
         episodes = items;
         notifyDataSetChanged();
         onSelectedItemsUpdated();
+        loadSummaryAvailability(items);
     }
 
     @Override
@@ -84,6 +95,7 @@ public class EpisodeItemListAdapter extends SelectableAdapter<EpisodeItemViewHol
 
         FeedItem item = episodes.get(pos);
         holder.bind(item);
+        holder.setSummaryAvailable(availableSummaries.contains(key(EpisodeMatcher.from(item))));
 
         holder.itemView.setOnClickListener(v -> {
             if (!inActionMode()) {
@@ -150,6 +162,64 @@ public class EpisodeItemListAdapter extends SelectableAdapter<EpisodeItemViewHol
         holder.secondaryActionButton.setOnClickListener(null);
         holder.dragHandle.setOnTouchListener(null);
         holder.coverHolder.setOnTouchListener(null);
+        holder.setSummaryAvailable(false);
+    }
+
+    private void loadSummaryAvailability(List<FeedItem> items) {
+        FragmentActivity activity = mainActivityRef.get();
+        if (activity == null) { return; }
+        ContentCrunchPreferences preferences = new ContentCrunchPreferences(activity);
+        if (preferences.getBaseUrl().isEmpty() || preferences.getAccessToken() == null) { return; }
+        List<ContentCrunchModels.EpisodeKey> requestKeys = new ArrayList<>();
+        for (FeedItem item : items) {
+            ContentCrunchModels.EpisodeKey episodeKey = EpisodeMatcher.from(item);
+            if (!EpisodeMatcher.isValid(episodeKey)) { continue; }
+            String cacheKey = key(episodeKey);
+            if (ContentCrunchCache.get(episodeKey) != null) {
+                availableSummaries.add(cacheKey);
+                checkedSummaries.add(cacheKey);
+            } else if (!checkedSummaries.contains(cacheKey)) {
+                requestKeys.add(episodeKey);
+            }
+        }
+        if (requestKeys.isEmpty()) { return; }
+        for (ContentCrunchModels.EpisodeKey episodeKey : requestKeys) {
+            checkedSummaries.add(key(episodeKey));
+        }
+        CompletableFuture.supplyAsync(() -> {
+            try {
+                List<ContentCrunchModels.EpisodeKey> available = new ArrayList<>();
+                for (int start = 0; start < requestKeys.size(); start += 100) {
+                    available.addAll(ContentCrunchClient.get(activity).availability(
+                            requestKeys.subList(start, Math.min(start + 100, requestKeys.size()))));
+                }
+                return available;
+            }
+            catch (Exception error) { return null; }
+        }).thenAccept(available -> {
+            FragmentActivity currentActivity = mainActivityRef.get();
+            if (currentActivity == null) { return; }
+            currentActivity.runOnUiThread(() -> {
+                if (available == null) {
+                    for (ContentCrunchModels.EpisodeKey episodeKey : requestKeys) {
+                        checkedSummaries.remove(key(episodeKey));
+                    }
+                    return;
+                }
+                for (ContentCrunchModels.EpisodeKey episodeKey : available) {
+                    availableSummaries.add(key(episodeKey));
+                }
+                notifyDataSetChanged();
+            });
+        });
+    }
+
+    private static String key(ContentCrunchModels.EpisodeKey episodeKey) {
+        if (!EpisodeMatcher.isValid(episodeKey)) { return ""; }
+        if (episodeKey.guid != null && !episodeKey.guid.isEmpty()) {
+            return episodeKey.feedUrl + "\nguid:" + episodeKey.guid;
+        }
+        return episodeKey.feedUrl + "\naudio:" + episodeKey.audioUrl;
     }
 
     /**

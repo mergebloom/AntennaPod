@@ -1098,6 +1098,7 @@
     <string name="content_crunch_reset_dismissed">Reset dismissed episodes</string>
     <string name="content_crunch_dismissed_reset">Dismissed episodes restored</string>
     <string name="content_crunch_ready">Summary ready</string>
+    <string name="content_crunch_summary_available">Content Crunch summary available</string>
     <string name="content_crunch_not_processed">Summary not processed</string>
     <string name="content_crunch_no_summary">Process this episode to create a summary.</string>
     <string name="content_crunch_process">Process</string>

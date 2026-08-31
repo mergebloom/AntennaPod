@@ -63,6 +63,13 @@ public final class ContentCrunchClient {
         return parseEpisode(executeGet("/api/v1/mobile/content-crunch/requests/" + requestId, true));
     }
 
+    public List<ContentCrunchModels.EpisodeKey> availability(List<ContentCrunchModels.EpisodeKey> keys)
+            throws IOException {
+        if (keys == null || keys.isEmpty()) { return new ArrayList<>(); }
+        return parseAvailability(execute("/api/v1/mobile/content-crunch/availability",
+                availabilityBody(keys, preferences.getSummaryConfig()), true, true));
+    }
+
     public ContentCrunchModels.EpisodeResult process(ContentCrunchModels.EpisodeKey key) throws IOException {
         return process(key, preferences.getSummaryConfig(), false);
     }
@@ -183,6 +190,46 @@ public final class ContentCrunchClient {
         requireValid(key);
         try { return new JSONObject().put("feedUrl", key.feedUrl).put("guid", key.guid).put("audioUrl", key.audioUrl); }
         catch (JSONException e) { throw new IOException(e); }
+    }
+
+    static JSONObject availabilityBody(List<ContentCrunchModels.EpisodeKey> keys, SummaryConfig config)
+            throws IOException {
+        JSONArray episodes = new JSONArray();
+        for (ContentCrunchModels.EpisodeKey key : keys) {
+            if (!EpisodeMatcher.isValid(key)) { continue; }
+            JSONObject episode = new JSONObject();
+            try {
+                episode.put("feedUrl", key.feedUrl);
+                if (key.guid != null && !key.guid.isEmpty()) { episode.put("guid", key.guid); }
+                if (key.audioUrl != null && !key.audioUrl.isEmpty()) { episode.put("audioUrl", key.audioUrl); }
+                episodes.put(episode);
+            } catch (JSONException e) { throw new IOException(e); }
+        }
+        JSONObject body = new JSONObject();
+        try {
+            body.put("episodes", episodes);
+            config.applyTo(body, false);
+            body.remove("stream");
+            return body;
+        } catch (JSONException e) { throw new IOException(e); }
+    }
+
+    static List<ContentCrunchModels.EpisodeKey> parseAvailability(JSONObject root) {
+        JSONObject data = root.optJSONObject("data");
+        if (data == null) { data = root; }
+        JSONArray available = data.optJSONArray("episodes");
+        List<ContentCrunchModels.EpisodeKey> keys = new ArrayList<>();
+        if (available == null) { return keys; }
+        for (int i = 0; i < available.length(); i++) {
+            JSONObject episode = available.optJSONObject(i);
+            if (episode != null && episode.optBoolean("available", false)) {
+                ContentCrunchModels.EpisodeKey key = new ContentCrunchModels.EpisodeKey(
+                        episode.optString("feedUrl", null), episode.optString("guid", null),
+                        episode.optString("audioUrl", null));
+                if (EpisodeMatcher.isValid(key)) { keys.add(key); }
+            }
+        }
+        return keys;
     }
 
     private static void requireValid(ContentCrunchModels.EpisodeKey key) throws IOException {

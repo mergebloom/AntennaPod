@@ -2,6 +2,8 @@ package de.danoeh.antennapod.net.contentcrunch;
 
 import org.json.JSONObject;
 import org.junit.Test;
+import java.util.Arrays;
+import java.util.List;
 import static org.junit.Assert.*;
 
 public class ContentCrunchClientTest {
@@ -54,5 +56,34 @@ public class ContentCrunchClientTest {
         assertEquals(150, body.getJSONObject("summaryConfig").getInt("sizeWords"));
         assertEquals("bullet points", body.getJSONObject("summaryConfig").getString("style"));
         assertTrue(body.getBoolean("stream"));
+    }
+
+    @Test
+    public void serializesAvailabilityBatchAndConfiguration() throws Exception {
+        List<ContentCrunchModels.EpisodeKey> keys = Arrays.asList(
+                new ContentCrunchModels.EpisodeKey("https://feed/one", "guid-1", null),
+                new ContentCrunchModels.EpisodeKey("https://feed/two", null, "https://audio/two"));
+
+        JSONObject body = ContentCrunchClient.availabilityBody(keys, new SummaryConfig(600, "study guide"));
+
+        assertEquals(2, body.getJSONArray("episodes").length());
+        assertEquals("guid-1", body.getJSONArray("episodes").getJSONObject(0).getString("guid"));
+        assertFalse(body.getJSONArray("episodes").getJSONObject(0).has("audioUrl"));
+        assertEquals(600, body.getJSONObject("summaryConfig").getInt("sizeWords"));
+        assertEquals("study guide", body.getJSONObject("summaryConfig").getString("style"));
+    }
+
+    @Test
+    public void parsesAvailableEpisodeKeysFromWrappedResponse() throws Exception {
+        JSONObject response = new JSONObject("{\"data\":{\"episodes\":["
+                + "{\"feedUrl\":\"https://feed/one\",\"guid\":\"guid-1\",\"available\":true},"
+                + "{\"feedUrl\":\"https://feed/two\",\"audioUrl\":\"https://audio/two\",\"available\":true},"
+                + "{\"feedUrl\":\"https://feed/three\",\"guid\":\"guid-3\",\"available\":false}]}} ");
+
+        List<ContentCrunchModels.EpisodeKey> available = ContentCrunchClient.parseAvailability(response);
+
+        assertEquals(2, available.size());
+        assertEquals("guid-1", available.get(0).guid);
+        assertEquals("https://audio/two", available.get(1).audioUrl);
     }
 }
