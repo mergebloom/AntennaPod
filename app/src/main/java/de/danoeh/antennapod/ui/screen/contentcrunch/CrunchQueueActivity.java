@@ -8,7 +8,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import de.danoeh.antennapod.R;
@@ -24,6 +23,7 @@ import de.danoeh.antennapod.net.contentcrunch.CrunchQueueStore;
 import de.danoeh.antennapod.net.contentcrunch.EpisodeMatcher;
 import de.danoeh.antennapod.storage.database.DBReader;
 import de.danoeh.antennapod.storage.database.DBWriter;
+import de.danoeh.antennapod.ui.common.ToolbarActivity;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -33,7 +33,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /** Summary-first inbox for recent new and unplayed episodes. */
-public class CrunchQueueActivity extends AppCompatActivity {
+public class CrunchQueueActivity extends ToolbarActivity {
     private final ExecutorService worker = Executors.newSingleThreadExecutor();
     private final List<FeedItem> items = new ArrayList<>();
     private final Map<Long, ContentCrunchModels.EpisodeResult> results = new HashMap<>();
