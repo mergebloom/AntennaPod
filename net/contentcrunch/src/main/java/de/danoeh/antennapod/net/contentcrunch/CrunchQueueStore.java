@@ -32,4 +32,10 @@ public final class CrunchQueueStore {
     }
 
     public void reset() { preferences.edit().remove(DISMISSED).apply(); }
+
+    public void restore(long id) {
+        Set<String> values = new HashSet<>(preferences.getStringSet(DISMISSED, Collections.emptySet()));
+        values.remove(Long.toString(id));
+        preferences.edit().putStringSet(DISMISSED, values).apply();
+    }
 }

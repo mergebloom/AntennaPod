@@ -65,6 +65,13 @@ public final class ContentCrunchPreferences {
         Arrays.stream(CATEGORIES).filter(this::isCategoryEnabled).forEach(result::add);
         return result;
     }
+    public SummaryConfig getSummaryConfig() {
+        return new SummaryConfig(preferences.getInt("summary_size", SummaryConfig.DEFAULT_SIZE),
+                preferences.getString("summary_style", SummaryConfig.DEFAULT_STYLE));
+    }
+    public void setSummaryConfig(SummaryConfig config) {
+        preferences.edit().putInt("summary_size", config.sizeWords).putString("summary_style", config.style).apply();
+    }
     public void logout() {
         preferences.edit().remove("access_token").remove("refresh_cookie").remove("refresh_cookie_origin").apply();
     }

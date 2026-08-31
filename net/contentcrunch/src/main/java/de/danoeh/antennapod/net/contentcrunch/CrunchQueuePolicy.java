@@ -17,11 +17,14 @@ public final class CrunchQueuePolicy {
     }
 
     public static String state(ContentCrunchModels.EpisodeResult result, boolean processing) {
-        if (processing) { return "processing"; }
+        if (processing && result == null) { return "waiting_transcript"; }
         if (result == null) { return "not_processed"; }
         if (ContentCrunchPoller.isCompleted(result)) { return "ready"; }
         if (ContentCrunchPoller.isFailed(result)) { return "failed"; }
-        return "processing";
+        String status = result.status == null ? "" : result.status.toLowerCase();
+        if (status.contains("transcript") || status.equals("queued")) { return "waiting_transcript"; }
+        if (status.contains("skip")) { return "generating_skip_analysis"; }
+        return "generating_summary";
     }
 
     public static String excerpt(String summary, int maxLength) {

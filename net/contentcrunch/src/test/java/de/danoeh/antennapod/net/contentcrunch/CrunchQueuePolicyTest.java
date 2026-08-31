@@ -16,11 +16,15 @@ public class CrunchQueuePolicyTest {
 
     @Test public void derivesProcessingReadyAndFailedStates() {
         assertEquals("not_processed", CrunchQueuePolicy.state(null, false));
-        assertEquals("processing", CrunchQueuePolicy.state(null, true));
+        assertEquals("waiting_transcript", CrunchQueuePolicy.state(null, true));
         assertEquals("ready", CrunchQueuePolicy.state(
                 new ContentCrunchModels.EpisodeResult("completed", "Summary", null), false));
         assertEquals("failed", CrunchQueuePolicy.state(
                 new ContentCrunchModels.EpisodeResult("failed", null, null), false));
+        assertEquals("generating_skip_analysis", CrunchQueuePolicy.state(
+                new ContentCrunchModels.EpisodeResult("ANALYZING_SKIP_SEGMENTS", null, null), false));
+        assertEquals("generating_summary", CrunchQueuePolicy.state(
+                new ContentCrunchModels.EpisodeResult("PROCESSING", null, null), false));
     }
 
     @Test public void createsBoundedReadableExcerpt() {

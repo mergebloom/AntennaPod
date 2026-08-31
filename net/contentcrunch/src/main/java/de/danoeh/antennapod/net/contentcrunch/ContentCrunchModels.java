@@ -38,11 +38,33 @@ public final class ContentCrunchModels {
         public final String status;
         public final String summary;
         public final List<SkipSegment> skipSegments;
+        public final String requestId;
+        public final String eventsUrl;
+        public final String stage;
+        public final int progress;
+        public final int summarySize;
+        public final String summaryStyle;
 
         public EpisodeResult(String status, String summary, List<SkipSegment> skipSegments) {
+            this(status, summary, skipSegments, null, SummaryConfig.DEFAULT_SIZE, SummaryConfig.DEFAULT_STYLE);
+        }
+
+        public EpisodeResult(String status, String summary, List<SkipSegment> skipSegments, String requestId,
+                int summarySize, String summaryStyle) {
+            this(status, summary, skipSegments, requestId, null, null, -1, summarySize, summaryStyle);
+        }
+
+        public EpisodeResult(String status, String summary, List<SkipSegment> skipSegments, String requestId,
+                String eventsUrl, String stage, int progress, int summarySize, String summaryStyle) {
             this.status = status;
-            this.summary = summary;
+            this.summary = summary == null ? "" : summary;
             this.skipSegments = skipSegments == null ? Collections.emptyList() : skipSegments;
+            this.requestId = requestId;
+            this.eventsUrl = eventsUrl;
+            this.stage = stage;
+            this.progress = progress;
+            this.summarySize = summarySize;
+            this.summaryStyle = summaryStyle;
         }
     }
 }

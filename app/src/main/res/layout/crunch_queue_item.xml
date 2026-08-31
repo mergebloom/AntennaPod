@@ -3,28 +3,30 @@
     xmlns:app="http://schemas.android.com/apk/res-auto" android:layout_width="match_parent"
     android:layout_height="wrap_content" android:layout_marginHorizontal="12dp" android:layout_marginTop="10dp"
     app:cardElevation="1dp">
-    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
-        android:orientation="vertical" android:padding="16dp">
+    <LinearLayout android:id="@+id/cardContent" android:layout_width="match_parent" android:layout_height="wrap_content"
+        android:orientation="vertical" android:padding="16dp" android:foreground="?attr/selectableItemBackground">
         <TextView android:id="@+id/title" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:textAppearance="?android:attr/textAppearanceMedium" android:textStyle="bold" />
         <TextView android:id="@+id/podcast" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="2dp" android:textAppearance="?android:attr/textAppearanceSmall" />
         <TextView android:id="@+id/state" android:layout_width="wrap_content" android:layout_height="wrap_content"
             android:layout_marginTop="10dp" android:accessibilityLiveRegion="polite" android:textStyle="bold" />
+        <TextView android:id="@+id/provenance" android:layout_width="wrap_content" android:layout_height="wrap_content"
+            android:layout_marginTop="4dp" android:text="@string/content_crunch_ai_label"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
         <TextView android:id="@+id/summary" android:layout_width="match_parent" android:layout_height="wrap_content"
             android:layout_marginTop="6dp" android:maxLines="6" android:ellipsize="end" />
-        <HorizontalScrollView android:layout_width="match_parent" android:layout_height="wrap_content"
-            android:layout_marginTop="8dp" android:scrollbars="none">
-            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal">
-                <Button android:id="@+id/process" style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/content_crunch_process" />
-                <Button android:id="@+id/queue" style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/content_crunch_add_queue" />
-                <Button android:id="@+id/archive" style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/content_crunch_archive" />
-                <Button android:id="@+id/dismiss" style="?attr/materialButtonOutlinedStyle"
-                    android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="@string/content_crunch_dismiss" />
-            </LinearLayout>
-        </HorizontalScrollView>
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+            android:layout_marginTop="8dp" android:orientation="horizontal">
+            <Button android:id="@+id/process" style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="@string/content_crunch_process" />
+            <Button android:id="@+id/queue" style="?attr/materialButtonOutlinedStyle"
+                android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
+                android:text="@string/content_crunch_add_queue" />
+            <ImageButton android:id="@+id/overflow" android:layout_width="48dp" android:layout_height="48dp"
+                android:background="?attr/selectableItemBackgroundBorderless" android:contentDescription="@string/content_crunch_more_actions"
+                android:src="@drawable/ic_settings" />
+        </LinearLayout>
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

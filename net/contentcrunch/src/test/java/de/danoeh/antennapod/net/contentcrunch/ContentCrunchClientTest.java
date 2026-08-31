@@ -31,4 +31,28 @@ public class ContentCrunchClientTest {
         assertEquals("", result.summary);
         assertTrue(result.skipSegments.isEmpty());
     }
+
+    @Test
+    public void parsesDurableRequestAndSelectedConfiguration() throws Exception {
+        ContentCrunchModels.EpisodeResult result = ContentCrunchClient.parseEpisode(new JSONObject("{\"data\":{"
+                + "\"requestId\":\"request-1\",\"eventsUrl\":\"/requests/request-1/events\","
+                + "\"status\":\"PROCESSING\",\"stage\":\"summarizing\",\"progress\":40,"
+                + "\"partialSummary\":\"Partial\",\"summaryConfig\":{\"sizeWords\":600,"
+                + "\"style\":\"study guide\"}}}"));
+        assertEquals("request-1", result.requestId);
+        assertEquals("/requests/request-1/events", result.eventsUrl);
+        assertEquals("summarizing", result.stage);
+        assertEquals(40, result.progress);
+        assertEquals("Partial", result.summary);
+        assertEquals(600, result.summarySize);
+        assertEquals("study guide", result.summaryStyle);
+    }
+
+    @Test
+    public void serializesNestedSummaryConfiguration() throws Exception {
+        JSONObject body = new SummaryConfig(150, "bullet points").applyTo(new JSONObject(), true);
+        assertEquals(150, body.getJSONObject("summaryConfig").getInt("sizeWords"));
+        assertEquals("bullet points", body.getJSONObject("summaryConfig").getString("style"));
+        assertTrue(body.getBoolean("stream"));
+    }
 }

@@ -10,6 +10,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ArrayAdapter;
+import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AlertDialog;
@@ -49,7 +52,10 @@ import de.danoeh.antennapod.net.contentcrunch.ContentCrunchCache;
 import de.danoeh.antennapod.net.contentcrunch.ContentCrunchClient;
 import de.danoeh.antennapod.net.contentcrunch.ContentCrunchModels;
 import de.danoeh.antennapod.net.contentcrunch.ContentCrunchPoller;
+import de.danoeh.antennapod.net.contentcrunch.ContentCrunchPreferences;
+import de.danoeh.antennapod.net.contentcrunch.ContentCrunchSseParser;
 import de.danoeh.antennapod.net.contentcrunch.EpisodeMatcher;
+import de.danoeh.antennapod.net.contentcrunch.SummaryConfig;
 import de.danoeh.antennapod.net.download.serviceinterface.DownloadServiceInterface;
 import de.danoeh.antennapod.playback.service.PlaybackController;
 import de.danoeh.antennapod.playback.service.PlaybackService;
@@ -72,7 +78,10 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 import org.greenrobot.eventbus.ThreadMode;
+import org.json.JSONException;
+import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.Collections;
 import java.util.Locale;
 import java.util.Objects;
@@ -374,37 +383,92 @@ public class ItemFragment extends Fragment {
         }
         ContentCrunchModels.EpisodeKey key = EpisodeMatcher.from(item);
         if (!EpisodeMatcher.isValid(key)) {
-            showContentCrunchResult(getString(R.string.content_crunch_invalid_episode));
+            showContentCrunchState(getString(R.string.content_crunch_invalid_episode), false);
             return;
         }
         ContentCrunchModels.EpisodeResult cached = ContentCrunchCache.get(key);
         if (cached != null && !cached.summary.isEmpty()) {
-            showContentCrunchResult(cached.summary);
+            showContentCrunchState(cached.summary, false);
             return;
         }
+        showSummaryConfiguration(key);
+    }
+
+    private void showSummaryConfiguration(ContentCrunchModels.EpisodeKey key) {
+        ContentCrunchPreferences preferences = new ContentCrunchPreferences(requireContext());
+        SummaryConfig current = preferences.getSummaryConfig();
+        LinearLayout content = new LinearLayout(requireContext());
+        content.setOrientation(LinearLayout.VERTICAL);
+        int padding = (int) (20 * getResources().getDisplayMetrics().density);
+        content.setPadding(padding, 0, padding, 0);
+        Spinner sizes = new Spinner(requireContext());
+        String[] sizeLabels = getResources().getStringArray(R.array.content_crunch_summary_sizes);
+        sizes.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, sizeLabels));
+        int selectedSize = 0;
+        for (int i = 0; i < SummaryConfig.SIZES.length; i++) {
+            if (SummaryConfig.SIZES[i] == current.sizeWords) { selectedSize = i; }
+        }
+        sizes.setSelection(selectedSize);
+        Spinner styles = new Spinner(requireContext());
+        String[] styleLabels = getResources().getStringArray(R.array.content_crunch_summary_styles);
+        styles.setAdapter(new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, styleLabels));
+        int selectedStyle = java.util.Arrays.asList(SummaryConfig.STYLES).indexOf(current.style);
+        styles.setSelection(Math.max(0, selectedStyle));
+        content.addView(sizes); content.addView(styles);
+        new AlertDialog.Builder(requireContext()).setTitle(R.string.content_crunch_configure_summary)
+                .setView(content).setNegativeButton(android.R.string.cancel, null)
+                .setPositiveButton(R.string.content_crunch_process, (dialog, which) -> {
+                    SummaryConfig config = new SummaryConfig(SummaryConfig.SIZES[sizes.getSelectedItemPosition()],
+                            SummaryConfig.STYLES[styles.getSelectedItemPosition()]);
+                    preferences.setSummaryConfig(config);
+                    processSummary(key, config);
+                }).show();
+    }
+
+    private void processSummary(ContentCrunchModels.EpisodeKey key, SummaryConfig config) {
         viewBinding.contentCrunchButton.setEnabled(false);
-        contentCrunchDisposable = Maybe.fromCallable(
-                () -> ContentCrunchClient.get(requireContext()).processAndPoll(key))
+        showContentCrunchState(getString(R.string.content_crunch_waiting_transcript), true);
+        final StringBuilder partial = new StringBuilder();
+        contentCrunchDisposable = Maybe.fromCallable(() -> ContentCrunchClient.get(requireContext())
+                .processAndObserve(key, config, event -> {
+                    final JSONObject data;
+                    try { data = new JSONObject(event.data); }
+                    catch (JSONException error) { throw new IOException(error); }
+                    if (event.type.equals("summary.delta")) {
+                        String updated = ContentCrunchSseParser.appendDelta(partial.toString(),
+                                data.optInt("offset", partial.length()), data.optString("text"));
+                        partial.setLength(0); partial.append(updated);
+                        requireActivity().runOnUiThread(() -> showContentCrunchState(updated, true));
+                    } else if (event.type.equals("stage") || event.type.equals("snapshot")) {
+                        String message = data.optString("message", data.optString("stage", ""));
+                        if (!message.isEmpty()) {
+                            requireActivity().runOnUiThread(() -> showContentCrunchState(message, true));
+                        }
+                    }
+                    return !event.type.equals("completed") && !event.type.equals("failed");
+                }))
                 .subscribeOn(Schedulers.io()).observeOn(AndroidSchedulers.mainThread())
                 .subscribe(result -> {
                     ContentCrunchCache.put(key, result);
                     viewBinding.contentCrunchButton.setEnabled(true);
                     if (ContentCrunchPoller.isFailed(result)) {
-                        showContentCrunchResult(getString(R.string.content_crunch_failed));
+                        showContentCrunchState(getString(R.string.content_crunch_failed), false);
                     } else if (ContentCrunchPoller.isCompleted(result)) {
-                        showContentCrunchResult(result.summary);
+                        showContentCrunchState(result.summary, false);
                     } else {
-                        showContentCrunchResult(getString(R.string.content_crunch_processing));
+                        showContentCrunchState(getString(R.string.content_crunch_still_processing), true);
                     }
                 }, error -> {
                     viewBinding.contentCrunchButton.setEnabled(true);
-                    showContentCrunchResult(getString(R.string.content_crunch_unavailable));
+                    showContentCrunchState(getString(R.string.content_crunch_unavailable), false);
                 });
     }
 
-    private void showContentCrunchResult(String message) {
-        new AlertDialog.Builder(requireContext()).setTitle(R.string.content_crunch_title)
-                .setMessage(message).setPositiveButton(android.R.string.ok, null).show();
+    private void showContentCrunchState(String message, boolean loading) {
+        if (viewBinding == null) { return; }
+        viewBinding.contentCrunchSummaryBlock.setVisibility(View.VISIBLE);
+        viewBinding.contentCrunchProgress.setVisibility(loading ? View.VISIBLE : View.GONE);
+        viewBinding.contentCrunchSummaryText.setText(message);
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)

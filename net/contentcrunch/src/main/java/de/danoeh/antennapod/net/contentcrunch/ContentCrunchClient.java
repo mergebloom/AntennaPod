@@ -15,6 +15,7 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 
 public final class ContentCrunchClient {
@@ -57,13 +58,43 @@ public final class ContentCrunchClient {
         return parseEpisode(executeGet("/api/v1/mobile/content-crunch/episodes/result", key, true));
     }
 
+    public ContentCrunchModels.EpisodeResult status(String requestId) throws IOException {
+        if (requestId == null || requestId.isEmpty()) { throw new IOException("Content Crunch request ID is missing"); }
+        return parseEpisode(executeGet("/api/v1/mobile/content-crunch/requests/" + requestId, true));
+    }
+
     public ContentCrunchModels.EpisodeResult process(ContentCrunchModels.EpisodeKey key) throws IOException {
-        return parseEpisode(execute("/api/v1/mobile/content-crunch/episodes/process", episodeBody(key), true, true));
+        return process(key, preferences.getSummaryConfig(), false);
+    }
+
+    public ContentCrunchModels.EpisodeResult process(ContentCrunchModels.EpisodeKey key, SummaryConfig config,
+            boolean stream) throws IOException {
+        JSONObject body = episodeBody(key);
+        try { config.applyTo(body, stream); } catch (JSONException e) { throw new IOException(e); }
+        return parseEpisode(execute("/api/v1/mobile/content-crunch/episodes/process", body, true, true));
     }
 
     public ContentCrunchModels.EpisodeResult processAndPoll(ContentCrunchModels.EpisodeKey key) throws IOException {
+        return processAndPoll(key, preferences.getSummaryConfig());
+    }
+
+    public ContentCrunchModels.EpisodeResult processAndPoll(ContentCrunchModels.EpisodeKey key, SummaryConfig config)
+            throws IOException {
         requireValid(key);
-        return ContentCrunchPoller.poll(process(key), () -> status(key), Thread::sleep);
+        ContentCrunchModels.EpisodeResult initial = process(key, config, true);
+        return ContentCrunchPoller.poll(initial,
+                () -> initial.requestId == null ? status(key) : status(initial.requestId), Thread::sleep);
+    }
+
+    public ContentCrunchModels.EpisodeResult processAndObserve(ContentCrunchModels.EpisodeKey key, SummaryConfig config,
+            ContentCrunchSseParser.Listener listener) throws IOException {
+        ContentCrunchModels.EpisodeResult initial = process(key, config, true);
+        if (initial.eventsUrl != null && !initial.eventsUrl.isEmpty() && !ContentCrunchPoller.isTerminal(initial)) {
+            try { consumeEvents(initial.eventsUrl, listener); } catch (IOException ignored) { }
+        }
+        ContentCrunchModels.EpisodeResult snapshot = initial.requestId == null ? status(key) : status(initial.requestId);
+        return ContentCrunchPoller.poll(snapshot,
+                () -> initial.requestId == null ? status(key) : status(initial.requestId), Thread::sleep);
     }
 
     public ContentCrunchModels.EpisodeResult lookupAndPoll(ContentCrunchModels.EpisodeKey key) throws IOException {
@@ -82,6 +113,29 @@ public final class ContentCrunchClient {
         try (Response response = client.newCall(builder.build()).execute()) {
             if (response.code() == 401 && retry && refresh()) { return executeGet(path, key, false); }
             return responseJson(response);
+        }
+    }
+
+    private JSONObject executeGet(String path, boolean retry) throws IOException {
+        Request request = authenticatedRequest(getBaseUrl().newBuilder()
+                .addEncodedPathSegments(path.substring(1)).build()).get().build();
+        try (Response response = client.newCall(request).execute()) {
+            if (response.code() == 401 && retry && refresh()) { return executeGet(path, false); }
+            return responseJson(response);
+        }
+    }
+
+    private void consumeEvents(String eventsUrl, ContentCrunchSseParser.Listener listener) throws IOException {
+        HttpUrl url = eventsUrl.startsWith("http") ? HttpUrl.get(eventsUrl)
+                : getBaseUrl().newBuilder().addEncodedPathSegments(eventsUrl.startsWith("/")
+                        ? eventsUrl.substring(1) : eventsUrl).build();
+        Request request = authenticatedRequest(url).header("Accept", "text/event-stream").get().build();
+        OkHttpClient streamClient = client.newBuilder().readTimeout(45, TimeUnit.SECONDS).build();
+        try (Response response = streamClient.newCall(request).execute()) {
+            if (!response.isSuccessful() || response.body() == null) {
+                throw new IOException("Content Crunch stream failed (" + response.code() + ")");
+            }
+            ContentCrunchSseParser.parse(response.body().source(), listener);
         }
     }
 
@@ -151,7 +205,16 @@ public final class ContentCrunchClient {
             }
         }
         JSONObject summary = data.optJSONObject("summary");
+        JSONObject config = data.optJSONObject("summaryConfig");
+        if (config == null) { config = data.optJSONObject("config"); }
+        if (config == null && summary != null) { config = summary.optJSONObject("config"); }
         return new ContentCrunchModels.EpisodeResult(data.optString("status", "unknown"),
-                summary == null ? "" : summary.optString("text", ""), segments);
+                summary == null ? data.optString("partialSummary", "") : summary.optString("text", ""), segments,
+                data.optString("requestId", data.optString("jobId", null)), data.optString("eventsUrl", null),
+                data.optString("stage", null), data.has("progress") ? data.optInt("progress", -1) : -1,
+                config == null ? SummaryConfig.DEFAULT_SIZE
+                        : config.optInt("sizeWords", config.optInt("summarySize", SummaryConfig.DEFAULT_SIZE)),
+                config == null ? SummaryConfig.DEFAULT_STYLE
+                        : config.optString("style", config.optString("summaryStyle", SummaryConfig.DEFAULT_STYLE)));
     }
 }

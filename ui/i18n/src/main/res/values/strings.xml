@@ -1105,4 +1105,31 @@
     <string name="content_crunch_add_queue">Add to queue</string>
     <string name="content_crunch_archive">Archive</string>
     <string name="content_crunch_dismiss">Dismiss</string>
+    <string name="content_crunch_skip_reason">a suggested section</string>
+    <string name="content_crunch_ai_label">AI-generated summary · Content Crunch</string>
+    <string name="content_crunch_configure_summary">Configure summary</string>
+    <string name="content_crunch_summary_size">Summary length</string>
+    <string name="content_crunch_next">Next</string>
+    <string name="content_crunch_queue_loading">Loading Crunch Queue…</string>
+    <string name="content_crunch_waiting_transcript">Waiting for transcript…</string>
+    <string name="content_crunch_generating_skip">Generating skip analysis…</string>
+    <string name="content_crunch_generating_summary">Generating summary…</string>
+    <string name="content_crunch_still_processing">Still processing. CrunchCast will keep checking.</string>
+    <string name="content_crunch_archived">Episode archived</string>
+    <string name="content_crunch_dismissed">Episode dismissed</string>
+    <string name="content_crunch_more_actions">More actions</string>
+    <string-array name="content_crunch_summary_sizes">
+        <item>Concise · 150 words</item>
+        <item>Standard · 300 words</item>
+        <item>Detailed · 600 words</item>
+        <item>Extended · 1000 words</item>
+    </string-array>
+    <string-array name="content_crunch_summary_styles">
+        <item>Bullet points</item>
+        <item>Narrative paragraphs</item>
+        <item>Cheat sheet</item>
+        <item>Executive summary</item>
+        <item>MECE</item>
+        <item>Study guide</item>
+    </string-array>
 </resources>

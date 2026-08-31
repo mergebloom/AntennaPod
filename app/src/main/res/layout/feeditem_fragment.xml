@@ -181,6 +181,39 @@
             android:layout_gravity="center_horizontal"
             android:text="@string/content_crunch_request_summary" />
 
+        <LinearLayout
+            android:id="@+id/contentCrunchSummaryBlock"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginVertical="8dp"
+            android:background="@drawable/bg_message_info"
+            android:orientation="vertical"
+            android:padding="16dp"
+            android:visibility="gone">
+
+            <TextView
+                android:id="@+id/contentCrunchSummaryLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="@string/content_crunch_ai_label"
+                android:textStyle="bold" />
+
+            <ProgressBar
+                android:id="@+id/contentCrunchProgress"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:indeterminate="true" />
+
+            <TextView
+                android:id="@+id/contentCrunchSummaryText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:accessibilityLiveRegion="polite" />
+        </LinearLayout>
+
         <TextView
             android:id="@+id/nonSubscribedWarningLabel"
             android:layout_width="wrap_content"

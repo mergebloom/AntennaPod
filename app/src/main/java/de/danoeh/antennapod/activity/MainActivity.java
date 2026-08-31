@@ -682,16 +682,16 @@ public class MainActivity extends CastEnabledActivity implements NavigationToolb
                 snackbar.setAnchorView(findViewById(R.id.audioplayerFragment));
             }
         }
-        snackbar.show();
-
         if (event.action != null) {
             snackbar.setAction(event.actionText, v -> event.action.accept(this));
         }
+        snackbar.show();
     }
 
     @Subscribe(threadMode = ThreadMode.MAIN)
     public void onSmartSkip(SmartSkipEvent event) {
-        String reason = event.label.isEmpty() ? event.category : event.label;
+        String reason = event.label == null || event.label.isEmpty() ? event.category : event.label;
+        if (reason == null || reason.isEmpty()) { reason = getString(R.string.content_crunch_skip_reason); }
         onEventMainThread(new MessageEvent(getString(R.string.content_crunch_skipped, reason),
                 context -> EventBus.getDefault().post(new SmartSkipUndoEvent(event)), getString(R.string.undo)));
     }
